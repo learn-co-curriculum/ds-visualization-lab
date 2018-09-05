@@ -36,7 +36,9 @@ The dataset is available in your folder as `winequality-red.csv`. Let's first lo
 
 ```python
 # Read dataset
+wine = pd.read_csv('winequality-red.csv')
 # Display first 5 observations
+wine.head()
 
 # fixed acidity	volatile acidity	citric acid	residual sugar	chlorides	free sulfur dioxide	total sulfur dioxide	density	pH	sulphates	alcohol	quality
 # 0	7.4	0.70	0.00	1.9	0.076	11.0	34.0	0.9978	3.51	0.56	9.4	5
@@ -175,7 +177,14 @@ As a first step, let's plot a bar graph to show frequency of each class in the `
 # Use pandas value_counts()
 # Create two lists: a) class labels , b) class frequency
 
+val_count = wine.quality.value_counts()
+keys =[]
+for key in val_count.keys():
+    keys.append(key)
 
+count = val_count.values
+
+print (keys, count)
     
 ```
 
@@ -187,14 +196,21 @@ Now we can use the two lists above for x and y axes of the bar graph where class
 
 ```python
 # Create a new figure object
+fig = plt.figure(figsize = (7,5))
 
 # Create an axes 
+ax = fig.add_subplot(111)
 
 # Plot vertical bars of fixed width by passing x and y values to .bar() function 
+ax.bar(keys, count)
 
 # Give a title to the bar graph
+ax.set_title('Red Wine Quality')
+ax.set_xlabel('Quality')
+ax.set_ylabel('Class frequency')
 
 # Output the final plot
+plt.show()
 ```
 
 
@@ -241,14 +257,28 @@ We shall use `pandas.value_counts()` again to calculate the frequency of each ne
 ```python
 #Count frequency of new classes
 
+val_count = wine.rating.value_counts()
+keys =[]
+
+for key in val_count.keys():
+    keys.append(key)
+count = val_count.values
+keys, count
+
 # Create a new figure object
+fig = plt.figure(figsize = (7,5))
 
 # Set a bar graph at new axes
+ax = fig.add_subplot(111)
+ax.bar(keys, count)
 
 # Provide axes labels and title
+ax.set_title('Red Wine Rating')
+ax.set_xlabel('Rating')
+ax.set_ylabel('Class frequency')
 
 # Output the final plot
-
+plt.show()  
 ```
 
 
@@ -264,12 +294,25 @@ How about plotting a pie chart for an alternative view with an indication of per
 
 ```python
 #Create labels for slices and set explode value
+labels = ['Average','Good','Poor']
+explode = [0.1,0,0]
 
 # Create a new figure space with a single axes
+fig, ax = plt.subplots(figsize=(8,8))
 
 # Create the pie chart with above data and customize by passing extra arguments
+ax.pie(count, 
+        explode=explode,    # Explode values for slices from the explode list
+        labels=labels,      
+        autopct='%1.1f%%',  # Auto percentage - 1 decimal point
+        shadow=True,        # Set the drop shadow to true
+        startangle=20)      # Set a start angle 
 
 # Set legends , axis and title
+ax.legend(labels, loc="best")
+ax.axis('equal')
+ax.set_title('Quality Rating for red wine')
+plt.show()
 ```
 
 
@@ -293,9 +336,13 @@ For this you need to set the `rating` classes at x-axis and amount of `sulphates
 
 ```python
 # Create a new figure and axes 
+fig, ax = plt.subplots(figsize=(10,6))
 
 # Create a box plot for wine classes against sulphates
-
+box = sns.boxplot(x="rating", y='sulphates', data = wine)
+box.set(xlabel='Wine Quality', 
+        ylabel='Sulphates', 
+        title='Alcohol percent in different wine quality types');
 ```
 
 
@@ -315,8 +362,13 @@ This time, we shall use a violin plot from seaborn to visualize the data. A viol
 
 ```python
 # Create a new figure and axes 
+fig, ax = plt.subplots(figsize=(10,6))
 
 # Create a label a violin plot to monitor the impact of citric acid on different classes of rating. 
+violin = sns.violinplot(x="rating", y='citric acid', data = wine)
+violin.set(xlabel='Wine Ratings', 
+           ylabel='Citric Acid', 
+           title='Citric acid in different types of Wine ratings');
 
 ```
 
@@ -345,7 +397,11 @@ We shall use seaborn's `distplot()` function. Set number of bins to 10,  also la
 
 
 ```python
-# Create a histogram for alcohol feature
+fig, ax = plt.subplots(figsize=(10,6))
+hist = sns.distplot(wine.alcohol, bins=10)
+hist.set(xlabel='Alcohol', 
+         ylabel='Frequency', 
+         title='Alcohol level distribution');
 ```
 
 
@@ -358,7 +414,11 @@ Let's visualize `alcohol` percentage against the `rating` variable to get some i
 
 
 ```python
+fig, ax = plt.subplots()
+fig.set_size_inches(15, 4)
+sns.violinplot(x = "rating", y = "alcohol", data = wine)
 
+plt.show()
 ```
 
 
@@ -375,7 +435,12 @@ Let's visualize it again using a scatter plot with color coding of samples based
 
 
 ```python
-
+sns.lmplot(x='rating', 
+           y='alcohol', 
+           data=wine, 
+           fit_reg=False,
+           hue='rating'
+          );
 ```
 
 
@@ -391,6 +456,7 @@ Looking at the spread of values across classes, this confirms our observation fr
 
 ```python
 # Plot a histogram of all numerical variables in the dataset
+wine.hist(figsize = (15,15));
 ```
 
 
@@ -410,11 +476,29 @@ Let's now plot a heatmap using seaborn's `.heatmap()` function to find the corre
 
 ```python
 # Create a copy of original dataset and drop the rating variable
+wine_corr = wine.copy()
+wine_corr = wine_corr.drop('rating', 1)
 
 # Create and print a correlation plot (round off to 2 decimal places) 
+corr = wine_corr.astype(float)\
+                .corr()\
+                .round(2)
+(corr)
 
-# corr
 
+# fixed acidity	volatile acidity	citric acid	residual sugar	chlorides	free sulfur dioxide	total sulfur dioxide	density	pH	sulphates	alcohol	quality
+# fixed acidity	1.00	-0.26	0.67	0.11	0.09	-0.15	-0.11	0.67	-0.68	0.18	-0.06	0.12
+# volatile acidity	-0.26	1.00	-0.55	0.00	0.06	-0.01	0.08	0.02	0.23	-0.26	-0.20	-0.39
+# citric acid	0.67	-0.55	1.00	0.14	0.20	-0.06	0.04	0.36	-0.54	0.31	0.11	0.23
+# residual sugar	0.11	0.00	0.14	1.00	0.06	0.19	0.20	0.36	-0.09	0.01	0.04	0.01
+# chlorides	0.09	0.06	0.20	0.06	1.00	0.01	0.05	0.20	-0.27	0.37	-0.22	-0.13
+# free sulfur dioxide	-0.15	-0.01	-0.06	0.19	0.01	1.00	0.67	-0.02	0.07	0.05	-0.07	-0.05
+# total sulfur dioxide	-0.11	0.08	0.04	0.20	0.05	0.67	1.00	0.07	-0.07	0.04	-0.21	-0.19
+# density	0.67	0.02	0.36	0.36	0.20	-0.02	0.07	1.00	-0.34	0.15	-0.50	-0.17
+# pH	-0.68	0.23	-0.54	-0.09	-0.27	0.07	-0.07	-0.34	1.00	-0.20	0.21	-0.06
+# sulphates	0.18	-0.26	0.31	0.01	0.37	0.05	0.04	0.15	-0.20	1.00	0.09	0.25
+# alcohol	-0.06	-0.20	0.11	0.04	-0.22	-0.07	-0.21	-0.50	0.21	0.09	1.00	0.48
+# quality	0.12	-0.39	0.23	0.01	-0.13	-0.05	
 ```
 
 
@@ -641,7 +725,13 @@ Let's now plot a heatmap using seaborn's `.heatmap()` function to find the corre
 
 
 ```python
-
+plt.subplots(figsize=(12,12))
+sns.heatmap(corr,
+            linewidths=0.1,
+            vmax=1, 
+            square=True, 
+            linecolor='white', 
+            annot=True)
 ```
 
 
@@ -668,7 +758,8 @@ Let's sort the values of `quality` variable (now containing correlation values) 
 ```python
 # Create a copy of corr.quality, drop the correlation of quality with itself and ..
 # sort values in a descending order
-
+quality_corr = corr.quality.copy().drop('quality').sort_values(ascending=False)
+quality_corr
 
 # alcohol                 0.48
 # sulphates               0.25
@@ -707,15 +798,25 @@ We can now show a bar graph of `quality_corr` while color coding positive correl
 
 ```python
 # Create a new figure object and axes
+fig = plt.figure(figsize = (20,10))
+ax = fig.add_subplot(111)
 
 # Plot vertical bars of fixed width by passing x and y values to .bar() function 
+bars = ax.bar(quality_corr.index, quality_corr.values)
 
 # Apply different colors to bars on +ve and -ve y values
+for bar, val in zip(bars,quality_corr.values):
+    if val <= 0 :
+        bar.set(color='red')
+    else:
+        bar.set(color='green')
+
 
 # Give a title to the bar graph
+ax.set_title('Red Wine Quality - Correlation with ingredients')
 
 # Output the final plot
-
+plt.show()
 ```
 
 
@@ -733,7 +834,18 @@ Another visualization tool we can use to inspect the relationship of variables i
 
 
 ```python
+from pandas.plotting import parallel_coordinates
 
+colormap=('skyblue', 'salmon', 'lightgreen')
+
+wine_pplt = wine[['alcohol','citric acid','fixed acidity']]
+wine_pplt_norm = (wine_pplt - wine_pplt.min()) / (wine_pplt.max() - wine_pplt.min())
+wine_pplt_norm_response = wine_pplt_norm.join(wine.rating)
+
+plt.figure(figsize=(20, 12))
+parallel_coordinates(wine_pplt_norm_response, 'rating', color=colormap)
+
+plt.show()
 ```
 
 
